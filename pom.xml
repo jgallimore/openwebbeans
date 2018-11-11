@@ -46,11 +46,10 @@
     <inceptionYear>2008</inceptionYear>
 
     <scm>
-        <connection>scm:git:https://gitbox.apache.org/repos/asf/openwebbeans.git</connection>
-        <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/openwebbeans.git</developerConnection>
-        <url>https://github.com/apache/openwebbeans</url>
-      <tag>openwebbeans-2.0.23</tag>
-  </scm>
+        <connection>scm:git:https://github.com/tomitribe/openwebbeans.git</connection>
+        <developerConnection>scm:svn:https://github.com/tomitribe/openwebbeans.git</developerConnection>
+        <url>https://github.com/tomitribe/openwebbeans.git</url>
+    </scm>
 
     <issueManagement>
         <system>jira</system>
