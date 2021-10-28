@@ -46,9 +46,9 @@
     <inceptionYear>2008</inceptionYear>
 
     <scm>
-        <connection>scm:git:https://github.com/tomitribe/openwebbeans.git</connection>
-        <developerConnection>scm:git:https://github.com/tomitribe/openwebbeans.git</developerConnection>
-        <url>https://github.com/tomitribe/openwebbeans.git</url>
+        <connection>scm:git:git@github.com:tomitribe/openwebbeans.git</connection>
+        <developerConnection>scm:git:git@github.com:tomitribe/openwebbeans.git</developerConnection>
+        <url>scm:git:git@github.com:tomitribe/openwebbeans.git</url>
     </scm>
 
     <issueManagement>
