@@ -937,4 +937,49 @@ public final class ClassUtil
 
         return null;
     }
+
+    public static Class<?> erase(Type t)
+    {
+        if (t instanceof Class<?>)
+        {
+            return (Class<?>) t;
+        }
+        else if (t instanceof ParameterizedType)
+        {
+            return (Class<?>) ((ParameterizedType) t).getRawType();
+        }
+        else if (t instanceof TypeVariable<?>)
+        {
+            // Erasure of a type variable is the erasure of its first bound
+            TypeVariable<?> tv = (TypeVariable<?>) t;
+            return erase(tv.getBounds()[0]);
+        }
+        else if (t instanceof WildcardType)
+        {
+            WildcardType wt = (WildcardType) t;
+            // erasure of ? extends X is erasure(X), of ? super X is Object
+            Type[] upper = wt.getUpperBounds();
+            return upper.length == 0 ? Object.class : erase(upper[0]);
+        }
+        else
+        {
+            // Fallback
+            return Object.class;
+        }
+    }
+
+    public static boolean satisfiesTypeVariable(TypeVariable<?> tvar, Class<?> candidate)
+    {
+        for (Type bound : tvar.getBounds())
+        {
+            Class<?> boundErasure = erase(bound);
+            if (!boundErasure.isAssignableFrom(candidate))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
 }

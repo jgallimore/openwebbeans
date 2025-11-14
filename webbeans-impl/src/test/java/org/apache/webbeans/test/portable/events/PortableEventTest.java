@@ -21,6 +21,7 @@ package org.apache.webbeans.test.portable.events;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.apache.webbeans.test.portable.events.extensions.*;
 import org.junit.Assert;
 
 import org.apache.webbeans.test.AbstractUnitTest;
@@ -29,17 +30,6 @@ import org.apache.webbeans.test.portable.events.beans.AppleTree;
 import org.apache.webbeans.test.portable.events.beans.Cherry;
 import org.apache.webbeans.test.portable.events.beans.CherryTree;
 import org.apache.webbeans.test.portable.events.beans.Tree;
-import org.apache.webbeans.test.portable.events.extensions.AppleExtension;
-import org.apache.webbeans.test.portable.events.extensions.AppleExtension1;
-import org.apache.webbeans.test.portable.events.extensions.MessageReceiverExtension;
-import org.apache.webbeans.test.portable.events.extensions.MessageSenderExtension;
-import org.apache.webbeans.test.portable.events.extensions.NotAppleExtnsion;
-import org.apache.webbeans.test.portable.events.extensions.RawTypeExtension;
-import org.apache.webbeans.test.portable.events.extensions.TreeExtension;
-import org.apache.webbeans.test.portable.events.extensions.TypeVariableExtension;
-import org.apache.webbeans.test.portable.events.extensions.WildcardExtension;
-import org.apache.webbeans.test.portable.events.extensions.WrongTypeVariableExtension;
-import org.apache.webbeans.test.portable.events.extensions.WrongWildcardExtension;
 import org.junit.Test;
 
 public class PortableEventTest extends AbstractUnitTest
@@ -258,6 +248,21 @@ public class PortableEventTest extends AbstractUnitTest
         Assert.assertSame(1, TreeExtension.APPLE_TREE_GENERIC_CALLED);
         Assert.assertSame(1, TreeExtension.CHERRY_TREE_GENERIC_CALLED);
         
+        shutDownContainer();
+    }
+
+    @Test
+    public void testParameterizedTypeWithTypeVariableExtension()
+    {
+        Collection<String> beanXmls = new ArrayList<String>();
+
+        Collection<Class<?>> beanClasses = new ArrayList<Class<?>>();
+        beanClasses.add(ParameterizedTypeWithTypeVariableExtension.EmitterFactoryImpl.class);
+        addExtension(new ParameterizedTypeWithTypeVariableExtension());
+        startContainer(beanClasses, beanXmls);
+
+        Assert.assertTrue(ParameterizedTypeWithTypeVariableExtension.CALLED);
+
         shutDownContainer();
     }
 }
