@@ -749,23 +749,29 @@ public class NotificationManager
         {
             TypeVariable<?> tv = (TypeVariable<?>)observerTypeActualArg;
             Type tvBound = tv.getBounds()[0];
-            
-            if(tvBound instanceof Class)
-            {
-                Class<?> clazzTvBound = (Class<?>)tvBound;
-                
-                if(Class.class.isInstance(beanClass) && clazzTvBound.isAssignableFrom(Class.class.cast(beanClass)))
-                {
-                    return true;
-                }                    
-            }            
 
+            if (Class.class.isInstance(beanClass) && ClassUtil.satisfiesTypeVariable(tv, Class.class.cast(beanClass)))
+            {
+                return true;
+            }
+
+//            if(tvBound instanceof Class)
+//            {
+//                Class<?> clazzTvBound = (Class<?>)tvBound;
+//
+//                if(Class.class.isInstance(beanClass) && clazzTvBound.isAssignableFrom(Class.class.cast(beanClass)))
+//                {
+//                    return true;
+//                }
+//            }
         }
-        else if(ClassUtil.isWildCardType(observerTypeActualArg))
+
+        if (ClassUtil.isWildCardType(observerTypeActualArg))
         {
             return ClassUtil.checkRequiredTypeIsWildCard(beanClass, observerTypeActualArg);
         }
-        else if(observerTypeActualArg instanceof Class)
+
+        if (observerTypeActualArg instanceof Class)
         {
             Class<?> observerClass = (Class<?>)observerTypeActualArg;
             if(Class.class.isInstance(beanClass) && observerClass.isAssignableFrom(Class.class.cast(beanClass)))
@@ -773,8 +779,15 @@ public class NotificationManager
                 return true;
             }
         }
-        else if (observerTypeActualArg instanceof ParameterizedType)
+
+        if (observerTypeActualArg instanceof ParameterizedType)
         {
+            if (Class.class.isInstance(beanClass)
+                    && ClassUtil.satisfiesParameterizedType((ParameterizedType) observerTypeActualArg,
+                                                            Class.class.cast(beanClass)))
+            {
+                return true;
+            }
             return GenericsUtil.isAssignableFrom(false, true, observerTypeActualArg, beanClass, new HashMap<>());
         }
         

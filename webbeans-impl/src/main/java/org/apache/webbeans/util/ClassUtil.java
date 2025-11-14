@@ -937,4 +937,178 @@ public final class ClassUtil
 
         return null;
     }
+
+    public static Class<?> erase(Type t)
+    {
+        if (t instanceof Class<?>)
+        {
+            return (Class<?>) t;
+        }
+        else if (t instanceof ParameterizedType)
+        {
+            return (Class<?>) ((ParameterizedType) t).getRawType();
+        }
+        else if (t instanceof TypeVariable<?>)
+        {
+            // Erasure of a type variable is the erasure of its first bound
+            TypeVariable<?> tv = (TypeVariable<?>) t;
+            return erase(tv.getBounds()[0]);
+        }
+        else if (t instanceof WildcardType)
+        {
+            WildcardType wt = (WildcardType) t;
+            // erasure of ? extends X is erasure(X), of ? super X is Object
+            Type[] upper = wt.getUpperBounds();
+            return upper.length == 0 ? Object.class : erase(upper[0]);
+        }
+        else
+        {
+            // Fallback
+            return Object.class;
+        }
+    }
+
+    public static boolean satisfiesParameterizedType(ParameterizedType type, Class<?> candidate)
+    {
+        Asserts.assertNotNull(type, "type");
+        Asserts.nullCheckForClass(candidate);
+
+        Type raw = type.getRawType();
+        if (!(raw instanceof Class))
+        {
+            return false;
+        }
+
+        Class<?> rawClass = (Class<?>) raw;
+        if (!rawClass.isAssignableFrom(candidate))
+        {
+            return false;
+        }
+
+        ParameterizedType candidateType = findParameterizedType(candidate, rawClass);
+        if (candidateType == null)
+        {
+            // candidate does not expose a parameterization for this raw type,
+            // so it cannot satisfy the required parameterized type
+            return false;
+        }
+
+        Type[] requiredArgs = type.getActualTypeArguments();
+        Type[] candidateArgs = candidateType.getActualTypeArguments();
+
+        if (requiredArgs.length != candidateArgs.length)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < requiredArgs.length; i++)
+        {
+            Type required = requiredArgs[i];
+            Type actual = candidateArgs[i];
+            Class<?> actualClass = getClazz(actual);
+
+            if (required instanceof TypeVariable)
+            {
+                if (actualClass == null || !satisfiesTypeVariable((TypeVariable<?>) required, actualClass))
+                {
+                    return false;
+                }
+            }
+            else if (isWildCardType(required))
+            {
+                if (actualClass == null || !checkRequiredTypeIsWildCard(actual, required))
+                {
+                    return false;
+                }
+            }
+            else if (required instanceof Class)
+            {
+                if (actualClass == null || !((Class<?>) required).isAssignableFrom(actualClass))
+                {
+                    return false;
+                }
+            }
+            else if (required instanceof ParameterizedType)
+            {
+                if (actualClass == null || !satisfiesParameterizedType((ParameterizedType) required, actualClass))
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if (!required.equals(actual))
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private static ParameterizedType findParameterizedType(Class<?> candidate, Class<?> targetRaw)
+    {
+        Type genericSuperclass = candidate.getGenericSuperclass();
+        ParameterizedType matching = findParameterizedType(genericSuperclass, targetRaw);
+        if (matching != null)
+        {
+            return matching;
+        }
+
+        for (Type type : candidate.getGenericInterfaces())
+        {
+            matching = findParameterizedType(type, targetRaw);
+            if (matching != null)
+            {
+                return matching;
+            }
+        }
+
+        Class<?> superClass = candidate.getSuperclass();
+        if (superClass != null && !Object.class.equals(superClass))
+        {
+            return findParameterizedType(superClass, targetRaw);
+        }
+
+        return null;
+    }
+
+    private static ParameterizedType findParameterizedType(Type type, Class<?> targetRaw)
+    {
+        if (type instanceof ParameterizedType)
+        {
+            ParameterizedType pt = (ParameterizedType) type;
+            Type raw = pt.getRawType();
+            if (raw instanceof Class && targetRaw.equals(raw))
+            {
+                return pt;
+            }
+            if (raw instanceof Class)
+            {
+                return findParameterizedType((Class<?>) raw, targetRaw);
+            }
+        }
+        else if (type instanceof Class)
+        {
+            return findParameterizedType((Class<?>) type, targetRaw);
+        }
+
+        return null;
+    }
+
+    public static boolean satisfiesTypeVariable(TypeVariable<?> tvar, Class<?> candidate)
+    {
+        for (Type bound : tvar.getBounds())
+        {
+            Class<?> boundErasure = erase(bound);
+            if (!boundErasure.isAssignableFrom(candidate))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
 }

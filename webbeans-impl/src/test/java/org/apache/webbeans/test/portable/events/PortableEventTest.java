@@ -21,6 +21,7 @@ package org.apache.webbeans.test.portable.events;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.apache.webbeans.test.portable.events.extensions.*;
 import org.junit.Assert;
 
 import org.apache.webbeans.test.AbstractUnitTest;
@@ -29,17 +30,6 @@ import org.apache.webbeans.test.portable.events.beans.AppleTree;
 import org.apache.webbeans.test.portable.events.beans.Cherry;
 import org.apache.webbeans.test.portable.events.beans.CherryTree;
 import org.apache.webbeans.test.portable.events.beans.Tree;
-import org.apache.webbeans.test.portable.events.extensions.AppleExtension;
-import org.apache.webbeans.test.portable.events.extensions.AppleExtension1;
-import org.apache.webbeans.test.portable.events.extensions.MessageReceiverExtension;
-import org.apache.webbeans.test.portable.events.extensions.MessageSenderExtension;
-import org.apache.webbeans.test.portable.events.extensions.NotAppleExtnsion;
-import org.apache.webbeans.test.portable.events.extensions.RawTypeExtension;
-import org.apache.webbeans.test.portable.events.extensions.TreeExtension;
-import org.apache.webbeans.test.portable.events.extensions.TypeVariableExtension;
-import org.apache.webbeans.test.portable.events.extensions.WildcardExtension;
-import org.apache.webbeans.test.portable.events.extensions.WrongTypeVariableExtension;
-import org.apache.webbeans.test.portable.events.extensions.WrongWildcardExtension;
 import org.junit.Test;
 
 public class PortableEventTest extends AbstractUnitTest
@@ -258,6 +248,228 @@ public class PortableEventTest extends AbstractUnitTest
         Assert.assertSame(1, TreeExtension.APPLE_TREE_GENERIC_CALLED);
         Assert.assertSame(1, TreeExtension.CHERRY_TREE_GENERIC_CALLED);
         
+//        Assert.assertSame(1, TreeExtension.GENERIC_CALLED);
+//        Assert.assertSame(1, TreeExtension.TREE_CALLED);
+//        Assert.assertSame(0, TreeExtension.APPLE_TREE_CALLED);
+//        Assert.assertSame(0, TreeExtension.CHERRY_TREE_CALLED);
+//        Assert.assertSame(0, TreeExtension.APPLE_TREE_GENERIC_CALLED);
+//        Assert.assertSame(0, TreeExtension.CHERRY_TREE_GENERIC_CALLED);
+
+        shutDownContainer();
+    }
+
+    @Test
+    public void testParameterizedTypeWithTypeVariableExtension()
+    {
+        Collection<String> beanXmls = new ArrayList<String>();
+
+        Collection<Class<?>> beanClasses = new ArrayList<Class<?>>();
+        beanClasses.add(ParameterizedTypeWithTypeVariableExtension.PaintToolFactoryImpl.class);
+        addExtension(new ParameterizedTypeWithTypeVariableExtension());
+        startContainer(beanClasses, beanXmls);
+
+        Assert.assertTrue(ParameterizedTypeWithTypeVariableExtension.CALLED);
+
+        shutDownContainer();
+    }
+
+    @Test
+    public void testComplexParameterizedTypeWithTypeVariableExtension()
+    {
+        Collection<String> beanXmls = new ArrayList<String>();
+
+        Collection<Class<?>> beanClasses = new ArrayList<Class<?>>();
+        beanClasses.add(ParameterizedTypeWithTypeVariableExtension.PaintToolFactoryImpl.class);
+        addExtension(new ComplexParameterizedTypeWithTypeVariableExtension());
+        startContainer(beanClasses, beanXmls);
+
+        Assert.assertTrue(ComplexParameterizedTypeWithTypeVariableExtension.CALLED);
+
+        shutDownContainer();
+    }
+
+    @Test
+    public void testTwoParameterTypeWithTypeVariableExtension()
+    {
+        Collection<String> beanXmls = new ArrayList<String>();
+
+        Collection<Class<?>> beanClasses = new ArrayList<Class<?>>();
+        beanClasses.add(TwoParameterTypeWithTypeVariableExtension.KeyValueStoreImpl.class);
+        addExtension(new TwoParameterTypeWithTypeVariableExtension());
+        startContainer(beanClasses, beanXmls);
+
+        Assert.assertTrue(TwoParameterTypeWithTypeVariableExtension.CALLED);
+
+        shutDownContainer();
+    }
+
+    @Test
+    public void testWildcardTwoParameterTypeExtension()
+    {
+        WildcardTwoParameterTypeExtension.CALLED = false;
+
+        Collection<String> beanXmls = new ArrayList<String>();
+
+        Collection<Class<?>> beanClasses = new ArrayList<Class<?>>();
+        beanClasses.add(TwoParameterTypeWithTypeVariableExtension.KeyValueStoreImpl.class);
+        addExtension(new WildcardTwoParameterTypeExtension());
+        startContainer(beanClasses, beanXmls);
+
+        Assert.assertTrue(WildcardTwoParameterTypeExtension.CALLED);
+
+        shutDownContainer();
+    }
+
+    @Test
+    public void testSuperWildcardTwoParameterTypeExtension()
+    {
+        SuperWildcardTwoParameterTypeExtension.CALLED = false;
+
+        Collection<String> beanXmls = new ArrayList<String>();
+
+        Collection<Class<?>> beanClasses = new ArrayList<Class<?>>();
+        beanClasses.add(TwoParameterTypeWithTypeVariableExtension.KeyValueStoreImpl.class);
+        addExtension(new SuperWildcardTwoParameterTypeExtension());
+        startContainer(beanClasses, beanXmls);
+
+        Assert.assertTrue(SuperWildcardTwoParameterTypeExtension.CALLED);
+
+        shutDownContainer();
+    }
+
+    @Test
+    public void testOuterTypeVariableConcreteInnerExtension()
+    {
+        OuterTypeVariableConcreteInnerExtension.CALLED = false;
+
+        Collection<String> beanXmls = new ArrayList<String>();
+
+        Collection<Class<?>> beanClasses = new ArrayList<Class<?>>();
+        beanClasses.add(NestedGenericsTypeVariableExtension.MyClassImpl.class);
+        addExtension(new OuterTypeVariableConcreteInnerExtension());
+        startContainer(beanClasses, beanXmls);
+
+        Assert.assertTrue(OuterTypeVariableConcreteInnerExtension.CALLED);
+
+        shutDownContainer();
+    }
+
+    @Test
+    public void testMultipleBoundsNestedTypeVariableExtension_positive()
+    {
+        MultipleBoundsNestedTypeVariableExtension.CALLED = false;
+
+        Collection<String> beanXmls = new ArrayList<String>();
+
+        Collection<Class<?>> beanClasses = new ArrayList<Class<?>>();
+        beanClasses.add(MultipleBoundsNestedTypeVariableExtension.FooWithSerializableBar.class);
+        addExtension(new MultipleBoundsNestedTypeVariableExtension());
+        startContainer(beanClasses, beanXmls);
+
+        Assert.assertTrue(MultipleBoundsNestedTypeVariableExtension.CALLED);
+
+        shutDownContainer();
+    }
+
+    @Test
+    public void testMultipleBoundsNestedTypeVariableExtension_negative()
+    {
+        MultipleBoundsNestedTypeVariableExtension.CALLED = false;
+
+        Collection<String> beanXmls = new ArrayList<String>();
+
+        Collection<Class<?>> beanClasses = new ArrayList<Class<?>>();
+        beanClasses.add(MultipleBoundsNestedTypeVariableExtension.FooWithNonSerializableBar.class);
+        addExtension(new MultipleBoundsNestedTypeVariableExtension());
+        startContainer(beanClasses, beanXmls);
+
+        Assert.assertFalse(MultipleBoundsNestedTypeVariableExtension.CALLED);
+
+        shutDownContainer();
+    }
+
+    @Test
+    public void testThreeParameterMixedVarianceExtension_positive()
+    {
+        ThreeParameterMixedVarianceExtension.CALLED = false;
+
+        Collection<String> beanXmls = new ArrayList<String>();
+
+        Collection<Class<?>> beanClasses = new ArrayList<Class<?>>();
+        beanClasses.add(ThreeParameterMixedVarianceExtension.TripleStoreImpl.class);
+        addExtension(new ThreeParameterMixedVarianceExtension());
+        startContainer(beanClasses, beanXmls);
+
+        Assert.assertTrue(ThreeParameterMixedVarianceExtension.CALLED);
+
+        shutDownContainer();
+    }
+
+    @Test
+    public void testThreeParameterMixedVarianceExtension_negative()
+    {
+        ThreeParameterMixedVarianceExtension.CALLED = false;
+
+        Collection<String> beanXmls = new ArrayList<String>();
+
+        Collection<Class<?>> beanClasses = new ArrayList<Class<?>>();
+        beanClasses.add(ThreeParameterMixedVarianceExtension.TripleStoreWrongImpl.class);
+        addExtension(new ThreeParameterMixedVarianceExtension());
+        startContainer(beanClasses, beanXmls);
+
+        Assert.assertFalse(ThreeParameterMixedVarianceExtension.CALLED);
+
+        shutDownContainer();
+    }
+
+    @Test
+    public void testNestedGenericsTypeVariableExtension()
+    {
+        Collection<String> beanXmls = new ArrayList<String>();
+
+        Collection<Class<?>> beanClasses = new ArrayList<Class<?>>();
+        beanClasses.add(NestedGenericsTypeVariableExtension.MyClassImpl.class);
+        addExtension(new NestedGenericsTypeVariableExtension());
+        startContainer(beanClasses, beanXmls);
+
+        Assert.assertTrue(NestedGenericsTypeVariableExtension.CALLED);
+
+        shutDownContainer();
+    }
+
+    @Test
+    public void testMismatchedNestedGenericsExtension()
+    {
+        MismatchedNestedGenericsExtension.CALLED = false;
+
+        Collection<String> beanXmls = new ArrayList<String>();
+
+        Collection<Class<?>> beanClasses = new ArrayList<Class<?>>();
+        beanClasses.add(NestedGenericsTypeVariableExtension.OtherMyClassImpl.class);
+        addExtension(new MismatchedNestedGenericsExtension());
+        startContainer(beanClasses, beanXmls);
+
+        Assert.assertFalse(MismatchedNestedGenericsExtension.CALLED);
+
+        shutDownContainer();
+    }
+
+    @Test
+    public void testRawTypeParameterizedObserverExtension()
+    {
+        RawTypeParameterizedObserverExtension.CALLED = false;
+
+        Collection<String> beanXmls = new ArrayList<String>();
+
+        Collection<Class<?>> beanClasses = new ArrayList<Class<?>>();
+        // register raw implementation which does not expose generic parameters
+        beanClasses.add(NestedGenericsTypeVariableExtension.MyClassRaw.class);
+        addExtension(new RawTypeParameterizedObserverExtension());
+        startContainer(beanClasses, beanXmls);
+
+        // the parameterized observer should NOT be called for a raw implementation
+        Assert.assertFalse(RawTypeParameterizedObserverExtension.CALLED);
+
         shutDownContainer();
     }
 }

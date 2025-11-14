@@ -18,6 +18,7 @@
  */
 package org.apache.webbeans.test.util;
 
+import java.lang.reflect.TypeVariable;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -104,5 +105,125 @@ public class ClassUtilTest {
         return ClassUtil.isOverridden(subClassMethod, superClassMethod);
     }
 
+    @Test
+    public void testSatisfiesTypeVariable_unbounded()
+    {
+        TypeVariable<?> t = Unbounded.class.getTypeParameters()[0];
+
+        Assert.assertTrue(ClassUtil.satisfiesTypeVariable(t, String.class));
+        Assert.assertTrue(ClassUtil.satisfiesTypeVariable(t, Number.class));
+    }
+
+    @Test
+    public void testSatisfiesTypeVariable_singleClassBound()
+    {
+        TypeVariable<?> t = NumberBound.class.getTypeParameters()[0];
+
+        Assert.assertTrue(ClassUtil.satisfiesTypeVariable(t, Integer.class));
+        Assert.assertFalse(ClassUtil.satisfiesTypeVariable(t, String.class));
+    }
+
+    @Test
+    public void testSatisfiesTypeVariable_singleInterfaceBound()
+    {
+        TypeVariable<?> t = ComparableBound.class.getTypeParameters()[0];
+
+        Assert.assertTrue(ClassUtil.satisfiesTypeVariable(t, String.class));
+        Assert.assertFalse(ClassUtil.satisfiesTypeVariable(t, Number.class));
+    }
+
+    @Test
+    public void testSatisfiesTypeVariable_multipleBounds()
+    {
+        TypeVariable<?> t = MultiBound.class.getTypeParameters()[0];
+
+        Assert.assertTrue(ClassUtil.satisfiesTypeVariable(t, Integer.class));
+        Assert.assertFalse(ClassUtil.satisfiesTypeVariable(t, Number.class));
+        Assert.assertFalse(ClassUtil.satisfiesTypeVariable(t, String.class));
+    }
+
+    @Test
+    public void testSatisfiesTypeVariable_parameterizedBound_usesErasure()
+    {
+        TypeVariable<?> t = ListBound.class.getTypeParameters()[0];
+
+        Assert.assertTrue(ClassUtil.satisfiesTypeVariable(t, java.util.ArrayList.class));
+        Assert.assertFalse(ClassUtil.satisfiesTypeVariable(t, java.util.HashSet.class));
+    }
+
+    @Test
+    public void testSatisfiesTypeVariable_wildcardInBound_usesUpperBoundErasure()
+    {
+        TypeVariable<?> t = ComparableWildcardBound.class.getTypeParameters()[0];
+
+        Assert.assertTrue(ClassUtil.satisfiesTypeVariable(t, NumberComparable.class));
+        Assert.assertTrue(ClassUtil.satisfiesTypeVariable(t, String.class));
+        Assert.assertFalse(ClassUtil.satisfiesTypeVariable(t, Number.class));
+    }
+
+    @Test
+    public void testSatisfiesTypeVariable_recursiveEnumBound()
+    {
+        TypeVariable<?> t = EnumBound.class.getTypeParameters()[0];
+
+        Assert.assertTrue(ClassUtil.satisfiesTypeVariable(t, MyEnum.class));
+        Assert.assertFalse(ClassUtil.satisfiesTypeVariable(t, String.class));
+    }
+
+    @Test
+    public void testSatisfiesTypeVariable_specificSubclassRequired()
+    {
+        TypeVariable<?> t = ArrayListBound.class.getTypeParameters()[0];
+
+        Assert.assertTrue(ClassUtil.satisfiesTypeVariable(t, java.util.ArrayList.class));
+        Assert.assertFalse(ClassUtil.satisfiesTypeVariable(t, java.util.List.class));
+    }
+
 }
 
+class Unbounded<T>
+{
+}
+
+class NumberBound<T extends Number>
+{
+}
+
+class ComparableBound<T extends Comparable<T>>
+{
+}
+
+class MultiBound<T extends Number & Comparable<T>>
+{
+}
+
+class ListBound<T extends java.util.List<String>>
+{
+}
+
+class ComparableWildcardBound<T extends Comparable<? super Number>>
+{
+}
+
+class EnumBound<T extends Enum<T>>
+{
+}
+
+enum MyEnum
+{
+    A, B
+}
+
+class NumberComparable implements Comparable<Number>
+{
+
+    @Override
+    public int compareTo(Number o)
+    {
+        return 0;
+    }
+}
+
+class ArrayListBound<T extends java.util.ArrayList<String>>
+{
+}
